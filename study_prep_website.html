@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Prep App</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644');
+      background-size: cover;
+      background-position: center;
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body class="bg-gray-900 bg-opacity-90 text-white min-h-screen flex flex-col items-center justify-center">
+  <div class="text-center mb-10">
+    <h1 class="text-5xl font-extrabold tracking-wide animate-pulse text-blue-400 drop-shadow-xl">📘 Study Prep Zone</h1>
+    <p class="text-lg text-gray-300 mt-2">Your smart companion for exam success</p>
+  </div>
+  <div class="bg-gray-800 bg-opacity-90 p-8 rounded-2xl shadow-2xl max-w-2xl w-full">
+    <div class="grid grid-cols-1 gap-4">
+      <button onclick="addSubject()" class="bg-indigo-600 hover:bg-indigo-700 py-2 px-4 rounded-xl">Add Subject</button>
+      <button onclick="viewSubjects()" class="bg-indigo-600 hover:bg-indigo-700 py-2 px-4 rounded-xl">View Subjects</button>
+      <button onclick="addTopic()" class="bg-green-600 hover:bg-green-700 py-2 px-4 rounded-xl">Add Topic</button>
+      <button onclick="viewTopics()" class="bg-green-600 hover:bg-green-700 py-2 px-4 rounded-xl">View Topics</button>
+      <button onclick="toggleTopicStatus()" class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded-xl">Toggle Topic Status</button>
+      <button onclick="addNote()" class="bg-yellow-600 hover:bg-yellow-700 py-2 px-4 rounded-xl">Add Note</button>
+      <button onclick="viewNotes()" class="bg-yellow-600 hover:bg-yellow-700 py-2 px-4 rounded-xl">View Notes</button>
+      <button onclick="setGoal()" class="bg-red-500 hover:bg-red-600 py-2 px-4 rounded-xl">Set Daily Goal</button>
+      <button onclick="viewGoal()" class="bg-red-500 hover:bg-red-600 py-2 px-4 rounded-xl">View Daily Goal</button>
+      <button onclick="startPomodoro()" class="bg-pink-500 hover:bg-pink-600 py-2 px-4 rounded-xl">Start Pomodoro</button>
+      <button onclick="showProgress()" class="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-xl">View Progress</button>
+      <button onclick="addReminder()" class="bg-purple-600 hover:bg-purple-700 py-2 px-4 rounded-xl">Add Revision Reminder</button>
+      <button onclick="viewReminders()" class="bg-purple-600 hover:bg-purple-700 py-2 px-4 rounded-xl">View Reminders</button>
+    </div>
+    <div id="output" class="mt-6 p-4 bg-gray-700 rounded-xl whitespace-pre-wrap"></div>
+  </div>
+
+  <script>
+    function addSubject() {
+      const subject = prompt("Enter subject name:");
+      if (!subject) return;
+      let subjects = JSON.parse(localStorage.getItem("subjects")) || [];
+      if (subjects.includes(subject)) {
+        alert("Subject already exists.");
+        return;
+      }
+      subjects.push(subject);
+      localStorage.setItem("subjects", JSON.stringify(subjects));
+      alert("Subject added!");
+    }
+
+    function viewSubjects() {
+      let subjects = JSON.parse(localStorage.getItem("subjects")) || [];
+      let html = subjects.length === 0 ? "<p>No subjects added yet.</p>" : "<ul class='list-disc pl-5'>" + subjects.map(s => `<li>${s}</li>`).join('') + "</ul>";
+      document.getElementById("output").innerHTML = html;
+    }
+
+    function addTopic() {
+      const subject = prompt("Enter subject name:");
+      if (!subject) return;
+      const topic = prompt("Enter topic:");
+      if (!topic) return;
+      let topics = JSON.parse(localStorage.getItem("topics")) || {};
+      if (!topics[subject]) topics[subject] = [];
+      topics[subject].push({ topic: topic, completed: false });
+      localStorage.setItem("topics", JSON.stringify(topics));
+      alert("Topic added!");
+    }
+
+    function viewTopics() {
+      let topics = JSON.parse(localStorage.getItem("topics")) || {};
+      let html = "";
+      for (let subject in topics) {
+        html += `\n📘 ${subject} Topics:\n`;
+        topics[subject].forEach(t => {
+          html += ` - ${t.topic} [${t.completed ? '✅' : '❌'}]\n`;
+        });
+      }
+      document.getElementById("output").innerText = html || "No topics added.";
+    }
+
+    function toggleTopicStatus() {
+      const subject = prompt("Enter subject name:");
+      const topicName = prompt("Enter topic name to toggle:");
+      let topics = JSON.parse(localStorage.getItem("topics")) || {};
+      if (topics[subject]) {
+        const topic = topics[subject].find(t => t.topic === topicName);
+        if (topic) {
+          topic.completed = !topic.completed;
+          localStorage.setItem("topics", JSON.stringify(topics));
+          alert(`Topic '${topicName}' marked as ${topic.completed ? 'completed' : 'incomplete'}.`);
+        } else {
+          alert("Topic not found.");
+        }
+      } else {
+        alert("Subject not found.");
+      }
+    }
+
+    function showProgress() {
+      let topics = JSON.parse(localStorage.getItem("topics")) || {};
+      let html = "📊 Progress:\n";
+      for (let subject in topics) {
+        const total = topics[subject].length;
+        const completed = topics[subject].filter(t => t.completed).length;
+        html += `${subject}: ${completed}/${total} topics completed\n`;
+      }
+      document.getElementById("output").innerText = html || "No progress yet.";
+    }
+
+    function addNote() {
+      const topic = prompt("Enter topic:");
+      if (!topic) return;
+      const note = prompt("Enter your note:");
+      if (!note) return;
+      let notes = JSON.parse(localStorage.getItem("notes")) || {};
+      notes[topic] = note;
+      localStorage.setItem("notes", JSON.stringify(notes));
+      alert("Note added!");
+    }
+
+    function viewNotes() {
+      let notes = JSON.parse(localStorage.getItem("notes")) || {};
+      let html = Object.keys(notes).length === 0 ? "No notes added." : "";
+      for (let topic in notes) {
+        html += `📝 ${topic}:\n${notes[topic]}\n\n`;
+      }
+      document.getElementById("output").innerText = html;
+    }
+
+    function setGoal() {
+      const goal = prompt("Enter your goal for today:");
+      if (!goal) return;
+      localStorage.setItem("dailyGoal", goal);
+      alert("Goal set!");
+    }
+
+    function viewGoal() {
+      const goal = localStorage.getItem("dailyGoal") || "No goal set for today.";
+      document.getElementById("output").innerText = `🎯 Today's Goal:\n${goal}`;
+    }
+
+    function startPomodoro() {
+      let time = 25 * 60;
+      let timerDisplay = document.getElementById("output");
+
+      function updateTimer() {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        timerDisplay.innerText = `⏳ Pomodoro Timer:\n${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        if (time > 0) {
+          time--;
+          setTimeout(updateTimer, 1000);
+        } else {
+          alert("Time's up! Take a short break.");
+        }
+      }
+
+      updateTimer();
+    }
+
+    function addReminder() {
+      const reminder = prompt("Enter revision reminder (e.g., Revise Math at 7 PM):");
+      if (!reminder) return;
+      let reminders = JSON.parse(localStorage.getItem("reminders")) || [];
+      reminders.push(reminder);
+      localStorage.setItem("reminders", JSON.stringify(reminders));
+      alert("Reminder added!");
+    }
+
+    function viewReminders() {
+      let reminders = JSON.parse(localStorage.getItem("reminders")) || [];
+      if (reminders.length === 0) {
+        document.getElementById("output").innerText = "No revision reminders set.";
+      } else {
+        document.getElementById("output").innerText = "🔔 Revision Reminders:\n" + reminders.map(r => `- ${r}`).join("\n");
+      }
+    }
+  </script>
+</body>
+</html>
+
+
